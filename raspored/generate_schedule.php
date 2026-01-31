@@ -44,12 +44,11 @@ if (count($employees) === 0) {
     exit;
 }
 
-$shiftHours = 8.0;   // smjena = 8 sati
-$nightRatio = 0.12;  // noćne ~12% radnih dana (samo can_night)
-
+$shiftHours = 8.0;   
+$nightRatio = 0.12;  
 $quota = [];
 $lastShift = [];
-$consec = []; // ✅ uzastopni RADNI dani (ne-off)
+$consec = []; 
 
 foreach ($employees as $e) {
     $id = (int)$e['id'];
@@ -86,13 +85,13 @@ function pickShift(array &$q, ?string $prev): ?string {
     }
     if (!$cands) return null;
 
-    // zabrana popodnevna -> sutra jutarnja
+
     if ($prev === 'popodnevna') {
         $cands = array_values(array_filter($cands, fn($x) => $x !== 'jutarnja'));
         if (!$cands) return null;
     }
 
-    // preferiraj ono čega ima najviše
+
     usort($cands, fn($a,$b) => ($q[$b] ?? 0) <=> ($q[$a] ?? 0));
     $top = array_slice($cands, 0, min(2, count($cands)));
     return $top[array_rand($top)];
@@ -107,10 +106,10 @@ for ($day = 1; $day <= $daysInMonth; $day++) {
     foreach ($employees as $e) {
         $id = (int)$e['id'];
 
-        // ✅ max 7 dana rada zaredom -> 8. mora OFF
+ 
         $worked = $consec[$id] ?? 0;
         if ($worked >= 7) {
-            // osiguraj da postoji off kvota (ako nema, "ukradi" jednu smjenu)
+
             if (($quota[$id]['off'] ?? 0) <= 0) {
                 if (($quota[$id]['popodnevna'] ?? 0) > 0) { $quota[$id]['popodnevna']--; $quota[$id]['off'] = 1; }
                 else if (($quota[$id]['jutarnja'] ?? 0) > 0) { $quota[$id]['jutarnja']--; $quota[$id]['off'] = 1; }
@@ -132,7 +131,7 @@ for ($day = 1; $day <= $daysInMonth; $day++) {
         if ($choice === 'off') {
             $quota[$id]['off']--;
             $lastShift[$id] = 'off';
-            $consec[$id] = 0;   // ✅ reset streak
+            $consec[$id] = 0;  
             continue;
         }
 
@@ -141,11 +140,12 @@ for ($day = 1; $day <= $daysInMonth; $day++) {
 
         $quota[$id][$choice]--;
         $lastShift[$id] = $choice;
-        $consec[$id] = ($consec[$id] ?? 0) + 1; // ✅ povećaj streak
+        $consec[$id] = ($consec[$id] ?? 0) + 1; 
     }
 }
 
 $fromAdd = isset($_GET['employee_added']) ? 1 : 0;
 header("Location: " . BASE_URL . "/views/schedule.php?year=$year&month=$month&success=1&employee_added=$fromAdd");
 exit;
+
 
